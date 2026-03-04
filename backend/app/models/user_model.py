@@ -1,0 +1,16 @@
+from datetime import datetime
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from app.db import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    status = Column(String, default="pending", nullable=False)  # pending | approved | rejected
+    is_admin = Column(Boolean, default=False)
+    approval_token = Column(String, unique=True, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
