@@ -4,6 +4,7 @@ services:
     name: fo-trading-backend
     runtime: python
     rootDir: backend
+    pythonVersion: "3.11.9"
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -33,6 +34,7 @@ services:
     name: fo-trading-frontend
     runtime: python
     rootDir: frontend
+    pythonVersion: "3.11.9"
     buildCommand: pip install -r requirements.txt
     startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
     envVars:
