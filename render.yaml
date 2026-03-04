@@ -1,0 +1,30 @@
+services:
+  # Backend — FastAPI
+  - type: web
+    name: fo-trading-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: BREEZE_API_KEY
+        sync: false
+      - key: BREEZE_API_SECRET
+        sync: false
+      - key: BREEZE_SESSION_TOKEN
+        sync: false
+      - key: QUOTAGUARD_URL
+        sync: false
+      - key: ENVIRONMENT
+        value: production
+
+  # Frontend — Streamlit
+  - type: web
+    name: fo-trading-frontend
+    runtime: python
+    rootDir: frontend
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: API_BASE_URL
+        sync: false
