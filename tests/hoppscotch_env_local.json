@@ -1,0 +1,16 @@
+{
+  "v": 1,
+  "name": "F&O Trader \u2013 Local",
+  "variables": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "secret": false
+    },
+    {
+      "key": "authToken",
+      "value": "<paste JWT here>",
+      "secret": true
+    }
+  ]
+}
