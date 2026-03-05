@@ -27,3 +27,22 @@ def get_option_chain(stock_code: str, expiry_date: str, option_type: str):
         expiry_date=expiry_date,
         option_type=option_type,
     )
+
+
+def get_quote(
+    stock_code: str,
+    exchange_code: str,
+    product_type: str,
+    expiry_date: str = "",
+    right: str = "",
+    strike_price: float = 0,
+):
+    breeze = get_breeze_client()
+    return breeze.get_quotes(
+        stock_code=stock_code,
+        exchange_code=exchange_code,
+        expiry_date=expiry_date,
+        product_type=product_type,
+        right=right,
+        strike_price=str(int(strike_price)) if strike_price else "",
+    )

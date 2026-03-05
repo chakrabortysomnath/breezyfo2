@@ -34,6 +34,29 @@ class OrderResponse(BaseModel):
     message: str
 
 
+# Market data schemas
+class QuoteRequest(BaseModel):
+    stock_code: str
+    exchange_code: str          # "NSE" | "BSE" | "NFO" | "BFO"
+    product_type: str           # "cash" | "options" | "futures"
+    expiry_date: Optional[str] = None
+    right: Optional[str] = None         # "call" | "put"
+    strike_price: Optional[float] = None
+
+
+class QuoteResponse(BaseModel):
+    stock_code: str
+    exchange_code: str
+    ltp: Optional[float] = None
+    open: Optional[float] = None
+    high: Optional[float] = None
+    low: Optional[float] = None
+    close: Optional[float] = None
+    volume: Optional[int] = None
+    open_interest: Optional[int] = None
+    raw: dict = {}
+
+
 # Auth schemas
 class RegisterRequest(BaseModel):
     username: str
