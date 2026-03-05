@@ -120,12 +120,11 @@ def render_register() -> None:
         st.markdown('<div class="brand-bar">📈</div>', unsafe_allow_html=True)
         st.markdown(
             '<p class="auth-title">Create your account</p>'
-            '<p class="auth-sub">Request access to F&O Trader</p>',
+            '<p class="auth-sub">Enter your details and the access code to register</p>',
             unsafe_allow_html=True,
         )
 
         username = st.text_input("Username", key="reg_username", placeholder="Choose a username")
-        email = st.text_input("Email address", key="reg_email", placeholder="you@example.com")
         password = st.text_input(
             "Password", type="password", key="reg_password", placeholder="Create a password"
         )
@@ -135,9 +134,12 @@ def render_register() -> None:
             key="reg_confirm",
             placeholder="Repeat password",
         )
+        access_code = st.text_input(
+            "Access code", type="password", key="reg_access_code", placeholder="Enter access code"
+        )
 
         if st.button("Register", use_container_width=True, type="primary"):
-            if not all([username, email, password, confirm]):
+            if not all([username, password, confirm, access_code]):
                 st.error("All fields are required.")
                 return
             if password != confirm:
@@ -148,16 +150,13 @@ def render_register() -> None:
                     f"{API_BASE}/auth/register",
                     json={
                         "username": username,
-                        "email": email,
                         "password": password,
+                        "access_code": access_code,
                     },
                     timeout=60,
                 )
                 if resp.status_code == 201:
-                    st.success(
-                        "Account request submitted! You will be notified once an admin approves your access."
-                    )
-                    st.info("Return to login once you receive approval.")
+                    st.success("Account created! You can now sign in.")
                 else:
                     st.error(resp.json().get("detail", "Registration failed. Please try again."))
             except (ConnectionError, ReadTimeout):
