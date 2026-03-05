@@ -15,11 +15,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 480
 
-    # Admin & email
-    admin_email: str = ""
-    gmail_sender: str = ""
-    gmail_app_password: str = ""
-    backend_url: str = "http://localhost:8000"
+    # Registration
+    registration_code: str = ""
 
     # App settings
     environment: str = "development"

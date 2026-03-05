@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
 
@@ -37,8 +37,8 @@ class OrderResponse(BaseModel):
 # Auth schemas
 class RegisterRequest(BaseModel):
     username: str
-    email: EmailStr
     password: str
+    access_code: str
 
 
 class LoginRequest(BaseModel):
