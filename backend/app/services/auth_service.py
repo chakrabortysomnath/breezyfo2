@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime, timedelta
 
 from fastapi import Depends, HTTPException, status
@@ -56,18 +55,16 @@ def get_current_user(
     return user
 
 
-def register_user(db: Session, username: str, email: str, password: str) -> User:
+def register_user(db: Session, username: str, password: str, access_code: str) -> User:
+    if not settings.registration_code or access_code != settings.registration_code:
+        raise HTTPException(status_code=403, detail="Invalid registration code")
     if db.query(User).filter(User.username == username).first():
         raise HTTPException(status_code=400, detail="Username already registered")
-    if db.query(User).filter(User.email == email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
 
     user = User(
         username=username,
-        email=email,
         hashed_password=hash_password(password),
-        status="pending",
-        approval_token=str(uuid.uuid4()),
+        status="approved",
     )
     db.add(user)
     db.commit()
@@ -79,28 +76,4 @@ def login_user(db: Session, username: str, password: str) -> str:
     user = db.query(User).filter(User.username == username).first()
     if not user or not verify_password(password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid username or password")
-    if user.status == "pending":
-        raise HTTPException(status_code=403, detail="Account pending admin approval")
-    if user.status == "rejected":
-        raise HTTPException(status_code=403, detail="Account access has been rejected")
     return create_access_token(username)
-
-
-def approve_user(db: Session, approval_token: str) -> User:
-    user = db.query(User).filter(User.approval_token == approval_token).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Invalid approval token")
-    user.status = "approved"
-    db.commit()
-    db.refresh(user)
-    return user
-
-
-def reject_user(db: Session, approval_token: str) -> User:
-    user = db.query(User).filter(User.approval_token == approval_token).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Invalid approval token")
-    user.status = "rejected"
-    db.commit()
-    db.refresh(user)
-    return user
