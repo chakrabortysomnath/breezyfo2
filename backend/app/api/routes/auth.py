@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
@@ -11,9 +11,9 @@ router = APIRouter()
 
 
 @router.post("/register", status_code=201)
-def register(payload: RegisterRequest, db: Session = Depends(get_db)):
+def register(payload: RegisterRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     user = register_user(db, payload.username, payload.email, payload.password)
-    send_approval_request(user.username, user.email, user.approval_token)
+    background_tasks.add_task(send_approval_request, user.username, user.email, user.approval_token)
     return {"message": "Registration successful. Your account is pending admin approval."}
 
 

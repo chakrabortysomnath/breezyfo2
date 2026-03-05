@@ -7,6 +7,7 @@ services:
     pythonVersion: "3.11.9"
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    timeout: 60
     envVars:
       - key: BREEZE_API_KEY
         sync: false
@@ -37,6 +38,7 @@ services:
     pythonVersion: "3.11.9"
     buildCommand: pip install -r requirements.txt
     startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+    timeout: 60
     envVars:
       - key: API_BASE_URL
         sync: false

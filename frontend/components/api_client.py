@@ -10,10 +10,10 @@ def _auth_headers() -> dict:
 
 
 def api_get(path: str, **kwargs) -> requests.Response:
-    return requests.get(f"{API_BASE}{path}", headers=_auth_headers(), timeout=15, **kwargs)
+    return requests.get(f"{API_BASE}{path}", headers=_auth_headers(), timeout=60, **kwargs)
 
 
 def api_post(path: str, json: dict = None, **kwargs) -> requests.Response:
     return requests.post(
-        f"{API_BASE}{path}", json=json, headers=_auth_headers(), timeout=15, **kwargs
+        f"{API_BASE}{path}", json=json, headers=_auth_headers(), timeout=60, **kwargs
     )

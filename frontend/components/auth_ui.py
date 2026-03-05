@@ -63,7 +63,7 @@ def render_login() -> None:
                 resp = requests.post(
                     f"{API_BASE}/auth/login",
                     json={"username": username, "password": password},
-                    timeout=10,
+                    timeout=60,
                 )
                 if resp.status_code == 200:
                     data = resp.json()
@@ -132,7 +132,7 @@ def render_register() -> None:
                         "email": email,
                         "password": password,
                     },
-                    timeout=10,
+                    timeout=60,
                 )
                 if resp.status_code == 201:
                     st.success(
