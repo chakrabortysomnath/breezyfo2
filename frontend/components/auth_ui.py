@@ -1,7 +1,20 @@
 import requests
 import streamlit as st
+from requests.exceptions import ConnectionError, ReadTimeout
 
 API_BASE = st.secrets.get("API_BASE_URL", "http://localhost:8000")
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def _wake_backend() -> str:
+    """Ping the backend health endpoint so Render wakes up before login is attempted."""
+    try:
+        resp = requests.get(f"{API_BASE}/health", timeout=30)
+        if resp.ok:
+            return "ok"
+        return f"degraded ({resp.status_code})"
+    except (ConnectionError, ReadTimeout):
+        return "unreachable"
 
 # ── Shared card CSS injected once ─────────────────────────────────────────────
 _CARD_CSS = """
@@ -39,6 +52,12 @@ _CARD_CSS = """
 def render_login() -> None:
     """Centered login card. Sets session_state on successful login."""
     st.markdown(_CARD_CSS, unsafe_allow_html=True)
+
+    # Wake the backend in the background (cached for 5 min)
+    with st.spinner("Connecting to server…"):
+        status = _wake_backend()
+    if status == "unreachable":
+        st.warning("Backend is unavailable. Please try again in a moment.")
 
     # Page layout: blank gutters on each side
     _, col, _ = st.columns([1, 1.4, 1])
@@ -79,8 +98,8 @@ def render_login() -> None:
                         st.error(detail)
                 else:
                     st.error(resp.json().get("detail", "Invalid username or password."))
-            except requests.exceptions.ConnectionError:
-                st.error("Cannot reach the server. Please try again later.")
+            except (ConnectionError, ReadTimeout):
+                st.error("Server is waking up — please wait a moment and try again.")
 
         st.markdown("---")
         st.markdown(
@@ -141,8 +160,8 @@ def render_register() -> None:
                     st.info("Return to login once you receive approval.")
                 else:
                     st.error(resp.json().get("detail", "Registration failed. Please try again."))
-            except requests.exceptions.ConnectionError:
-                st.error("Cannot reach the server. Please try again later.")
+            except (ConnectionError, ReadTimeout):
+                st.error("Server is waking up — please wait a moment and try again.")
 
         st.markdown("---")
         if st.button("Back to Sign In", use_container_width=True):
