@@ -15,12 +15,17 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 
 
+def _truncate(password: str) -> str:
+    """bcrypt silently truncates at 72 bytes; be explicit to avoid verify mismatches."""
+    return password.encode()[:72].decode("utf-8", errors="ignore")
+
+
 def hash_password(plain: str) -> str:
-    return pwd_context.hash(plain)
+    return pwd_context.hash(_truncate(plain))
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return pwd_context.verify(_truncate(plain), hashed)
 
 
 def create_access_token(username: str) -> str:
