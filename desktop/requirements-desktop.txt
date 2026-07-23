@@ -1,39 +1,33 @@
-# Covered Call Analyser — Desktop build dependencies
+# Breezy F&O — Desktop dependencies
 #
-# Consolidated, cleaned dependency set for running the app locally on a laptop
-# (backend + frontend + native desktop window), assuming Python is already
-# installed. Install into a virtualenv via desktop/setup.ps1.
+# Everything needed to run the backend + frontend + native window locally on a
+# laptop (Python assumed present). Install into a virtualenv via desktop/setup.ps1.
 #
-# Versions are LOWER-BOUND ranges (not hard pins) so pip installs wheels that
-# match the local interpreter. The original backend/requirements.txt hard-pinned
-# old builds (fastapi 0.104 / pydantic 2.5 / numpy 1.26 / scipy 1.11) that have
-# no wheels for Python 3.12/3.13 and would fail to install there.
-#
-# Cleaned up vs the original backend/requirements.txt:
-#   - ADDED  breeze_connect (imported everywhere but was missing from backend reqs)
-#   - ADDED  pywebview      (native desktop window shell)
-#   - DROPPED sqlalchemy, psycopg2-binary, alembic, python-jose, passlib,
-#            google-auth, email-validator  (no DB / JWT / OAuth code exists)
+# Mirrors backend/requirements.txt and frontend/requirements.txt, plus pywebview
+# for the native window. Versions are LOWER-BOUND ranges (not the hard pins used
+# in the service requirements) so pip installs wheels that match the local
+# interpreter — the hard pins (pydantic 2.7.1, bcrypt 3.2.2, sqlalchemy 2.0.30)
+# have no wheels for Python 3.12/3.13 and would fail to build there.
 
-# ---- Backend (FastAPI + Breeze) ----
-fastapi>=0.110
-uvicorn>=0.27
-python-multipart>=0.0.9
-pydantic>=2.7
+# ---- Backend (FastAPI + Breeze + SQLite + JWT auth) ----
+fastapi>=0.111
+uvicorn[standard]>=0.29
+pydantic[email]>=2.7
 pydantic-settings>=2.2
 python-dotenv>=1.0
-requests>=2.31
-numpy>=1.26.4,<3        # 3.13 needs numpy 2.x wheels; cap below 3 for safety
-scipy>=1.11
-breeze_connect          # was MISSING from backend/requirements.txt; pulls python-socketio, websocket-client
+httpx>=0.27
+breeze-connect>=1.0.57
+PySocks>=1.7.1
+sqlalchemy>=2.0.30
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.0             # modern wheels incl. Python 3.13; passlib works with 4.x
+python-jose[cryptography]>=3.3.0
 
 # ---- Frontend (Streamlit UI) ----
-streamlit>=1.42,<2.0
-plotly>=5.22
-pandas>=2.2.3,<3        # app is written for pandas 2.x; avoid pandas 3.0 breaking changes
-fpdf2>=2.7,<3.0
-yfinance>=0.2           # best-effort technicals/candlestick; degrades gracefully if unreachable
-anthropic>=0.40         # imported even when CLAUDE_INTEL_BYPASS=true; keep to avoid ImportError
+streamlit>=1.40,<2.0
+requests>=2.32
+pandas>=2.2.3,<3        # app targets pandas 2.x; avoid 3.0 breaking changes
+plotly>=5.24
 
 # ---- Desktop shell ----
 pywebview               # native window (WebView2 on Windows 11)
