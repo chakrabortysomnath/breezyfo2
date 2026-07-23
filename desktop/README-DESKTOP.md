@@ -1,15 +1,15 @@
 # Breezy F&O — Desktop build
 
-Run the Covered Call Analyser on a laptop as a native desktop app — no Render,
-no cloud. The FastAPI backend and the Streamlit UI both run locally on
-`127.0.0.1` (random free ports), wrapped in a native window.
+Run the F&O Trading app on a laptop as a native desktop app — no Render, no
+cloud. The FastAPI backend and the Streamlit UI both run locally on `127.0.0.1`,
+wrapped in a native window.
 
 **Prerequisite:** Python 3.10+ installed and on `PATH`. On Windows 11 the
 WebView2 runtime (used for the native window) is already present.
 
 ## One-time setup
 
-From the `covered-call-analyser` folder:
+From the repository root:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File desktop\setup.ps1
@@ -25,10 +25,10 @@ Desktop.
 
 ## Running
 
-Double-click the **Breezy F&O** Desktop shortcut. A window opens on the Breeze
-login screen — paste your ICICI Breeze API key, secret, and today's session
-token (regenerated daily via the ICICI login + TOTP flow). Closing the window
-shuts down both local services.
+Double-click the **Breezy F&O** Desktop shortcut. A window opens on the app's
+login screen — register (with the app's registration code, if configured) or log
+in, then enter your ICICI Breeze credentials as usual. Closing the window shuts
+down both local services.
 
 ### Running with a visible console (for troubleshooting)
 
@@ -40,26 +40,25 @@ This prints backend/Streamlit logs so you can see any startup errors.
 
 ## What the launcher does
 
-- Sets `CLAUDE_INTEL_BYPASS=true` (the AI "equity intel" runs in mock mode; no
-  Anthropic API key needed) and points `BACKEND_URL` at the local backend.
-- Starts the FastAPI backend (uvicorn) on a background thread.
-- Starts the Streamlit UI as a child process.
-- Opens a native window (pywebview). If the window can't be created it falls
-  back to your default browser and keeps running until you close it.
+- Locates the FastAPI app (`app.main` under `backend/`) and starts it with
+  **uvicorn** on a background thread, bound to `127.0.0.1:8000` (falls back to a
+  free port if 8000 is busy).
+- Writes `API_BASE_URL` into `frontend/.streamlit/secrets.toml` so the Streamlit
+  UI talks to this local backend (the frontend reads `st.secrets["API_BASE_URL"]`,
+  default `http://localhost:8000`).
+- Starts the Streamlit UI as a child process (from the `frontend/` dir, so its
+  theme and secrets load) on a free port.
+- Opens a native window (pywebview). If the window can't be created it falls back
+  to your default browser and keeps running until you close it.
 
 ## Notes & known limitations
 
-- **Credentials are never stored** — they live only in the app session while the
-  window is open, exactly as in the web version.
+- **Local database:** the backend uses SQLite (`users.db`) created next to where
+  the app is launched — user accounts and auth live there, on your machine only.
+- **Credentials:** your ICICI Breeze credentials are handled by the app exactly
+  as in the web version; nothing extra is stored by the launcher.
 - **QuotaGuard proxy is not used.** It was a Render-only workaround for rotating
   IPs; on a laptop it stays disabled (unset), which is a no-op in the code.
-- **yfinance is best-effort.** The 52-week stats and candlestick chart come from
-  Yahoo Finance via `yfinance`. On a corporate network Yahoo may be blocked or
-  rate-limited; if so, those extras simply won't appear — **the core covered-call
-  / strangle analysis (from Breeze) is unaffected.** If you are behind a
-  corporate proxy and want the charts, set `HTTP_PROXY` / `HTTPS_PROXY` before
-  launching. If yfinance charts break after a Yahoo change, run
-  `& "$env:LOCALAPPDATA\BreezyFO\venv\Scripts\python.exe" -m pip install -U yfinance`.
 - **WebView2:** if the window is blank, install the WebView2 Evergreen Runtime
   from https://developer.microsoft.com/microsoft-edge/webview2/ and relaunch.
 
@@ -68,6 +67,5 @@ This prints backend/Streamlit logs so you can see any startup errors.
 | File | Purpose |
 |------|---------|
 | `launcher.py` | Boots backend + Streamlit + native window; handles shutdown. |
-| `requirements-desktop.txt` | Consolidated dependency set for the local venv. |
+| `requirements-desktop.txt` | Dependency set for the local venv (backend + frontend + pywebview). |
 | `setup.ps1` | One-time venv + install + Desktop shortcut. |
-| `assets/icon.ico` | Optional window/shortcut icon (add your own). |
